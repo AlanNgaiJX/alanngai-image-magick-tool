@@ -1,0 +1,23 @@
+{
+  "name": "alanngai-image-magick-tool",
+  "version": "1.0.0",
+  "description": "image-magick-tool",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "check-dep": "node ./check_dep.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlanNgaiJX/alanngai-image-magick-tool.git"
+  },
+  "author": "AlanNgai",
+  "license": "ISC",
+  "dependencies": {
+    "alanngai-node-helper": "^1.0.3",
+    "gm": "^1.23.1"
+  },
+  "devDependencies": {
+    "alanngai-update-notifier": "^1.0.1"
+  }
+}
