@@ -20,6 +20,23 @@ function getImageSize(filePath) {
 }
 
 /**
+ * 获取图片旋转角属性
+ * @param  { string } filePath 文件路径
+ * @return { promise }
+ */
+function getImageOri(filePath) {
+  return new Promise((resolve, reject) => {
+    gm(filePath).orientation((err, ori) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(ori);
+      }
+    });
+  });
+}
+
+/**
  * 调整图片大小
  * @param  { string } inputPath 输入路径
  * @param  { string } outputPath 输出路径
@@ -112,18 +129,32 @@ function remarkImage(inputPath, outputPath, fontConfig) {
  * @param  { string } outputPath 输出路径
  * @return { promise }
  */
-function removeExifData(inputPath, outputPath) {
+function removeExifData(inputPath, outputPath, isFuji) {
   return new Promise((resolve, reject) => {
-    gm(inputPath)
-      .autoOrient()
-      .noProfile()
-      .write(outputPath, function (err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(outputPath);
-        }
-      });
+    gm(inputPath).orientation(function (err, orientation) {
+      if (orientation === "LeftBottom") {
+        gm(inputPath)
+          .rotate("transparent", 270) // 这里本来建议用 autoOrient 完成，但是不兼容富士图片
+          .noProfile()
+          .write(outputPath, function (err) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(outputPath);
+            }
+          });
+      } else {
+        gm(inputPath)
+          .noProfile()
+          .write(outputPath, function (err) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(outputPath);
+            }
+          });
+      }
+    });
   });
 }
 
@@ -136,12 +167,21 @@ function removeExifData(inputPath, outputPath) {
  */
 function allProcess(inputPath, outputPath, config) {
   return new Promise((resolve, reject) => {
-    const { sizeConfig, fontConfig, needExif } = config;
+    const { sizeConfig, fontConfig, needExif, orientation } = config;
 
     let image = gm(inputPath);
 
     if (sizeConfig) {
       image = image.resize(sizeConfig[0], sizeConfig[1], "!");
+    }
+    
+    // 注意顺序，先旋转后打水印，不然位置会变
+    if (!needExif) {
+      if (orientation === "LeftBottom") {
+        image = image.rotate("transparent", 270).noProfile(); // 防止竖图去掉 Exif信息后变成横图
+      } else {
+        image = image.noProfile();
+      }
     }
 
     if (fontConfig) {
@@ -176,10 +216,6 @@ function allProcess(inputPath, outputPath, config) {
         .drawText(x, y, txt, gravity);
     }
 
-    if (!needExif) {
-      image = image.autoOrient().noProfile();
-    }
-
     image.write(outputPath, function (err) {
       if (err) {
         reject(err);
@@ -192,9 +228,10 @@ function allProcess(inputPath, outputPath, config) {
 
 module.exports = exports = {
   getImageSize,
+  getImageOri,
   resizeImage,
   getSizeConfig,
   remarkImage,
   removeExifData,
-  allProcess
+  allProcess,
 };
