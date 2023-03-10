@@ -1,6 +1,6 @@
 {
   "name": "alanngai-image-magick-tool",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "image-magick-tool",
   "main": "index.js",
   "scripts": {

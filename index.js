@@ -115,6 +115,7 @@ function remarkImage(inputPath, outputPath, fontConfig) {
 function removeExifData(inputPath, outputPath) {
   return new Promise((resolve, reject) => {
     gm(inputPath)
+      .autoOrient()
       .noProfile()
       .write(outputPath, function (err) {
         if (err) {
@@ -176,7 +177,7 @@ function allProcess(inputPath, outputPath, config) {
     }
 
     if (!needExif) {
-      image = image.noProfile();
+      image = image.autoOrient().noProfile();
     }
 
     image.write(outputPath, function (err) {
