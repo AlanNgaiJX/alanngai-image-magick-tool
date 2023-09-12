@@ -1,5 +1,5 @@
 const gm = require("gm").subClass({
-  imageMagick: true,
+  imageMagick: '7+',
 });
 
 /**
